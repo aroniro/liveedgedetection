@@ -6,6 +6,8 @@ import info.hannes.liveedgedetection.ScanConstants
 import info.hannes.liveedgedetection.view.Quadrilateral
 import org.opencv.core.*
 import org.opencv.imgproc.Imgproc
+import org.opencv.imgproc.Imgproc.THRESH_BINARY
+import org.opencv.imgproc.Imgproc.THRESH_OTSU
 import timber.log.Timber
 import java.util.*
 import kotlin.math.abs
@@ -110,7 +112,7 @@ object ScanUtils {
         Imgproc.cvtColor(originalMat, originalMat, Imgproc.COLOR_BGR2GRAY, 4)
 
         // Just OTSU/Binary thresholding is not enough.
-        //Imgproc.threshold(mGrayMat, mGrayMat, 150, 255, THRESH_BINARY + THRESH_OTSU);
+        Imgproc.threshold(originalMat, originalMat, 150.0, 255.0, THRESH_BINARY + THRESH_OTSU);
 
         /*
          *  1. We shall first blur and normalize the image for uniformity,

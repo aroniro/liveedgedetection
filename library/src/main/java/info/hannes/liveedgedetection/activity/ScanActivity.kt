@@ -6,11 +6,13 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.PointF
+import android.graphics.*
+import android.media.ExifInterface
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.MediaStore
 import android.transition.TransitionManager
 import android.view.Gravity
 import android.view.View
@@ -20,6 +22,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import info.hannes.liveedgedetection.*
 import info.hannes.liveedgedetection.databinding.ActivityScanBinding
@@ -32,6 +35,7 @@ import org.opencv.core.Point
 import org.opencv.imgproc.Imgproc
 import timber.log.Timber
 import java.io.File
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs
@@ -56,18 +60,70 @@ class ScanActivity : AppCompatActivity(), IScanner, View.OnClickListener {
         val view = binding.root
         setContentView(view)
 
-        timeHoldStill = intent.getLongExtra(ScanConstants.TIME_HOLD_STILL, ScanSurfaceView.DEFAULT_TIME_POST_PICTURE)
+        if (intent.hasExtra(ScanConstants.IMAGE_PATH))
+            checkExternalStoragePermissions()
+
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
         binding.buttonCropOk.setOnClickListener(this)
         binding.buttonCropReject.setOnClickListener {
-            TransitionManager.beginDelayedTransition(binding.containerScan)
-            binding.cropLayout.visibility = View.GONE
-            imageSurfaceView?.setPreviewCallback()
+            when(intent.action){
+                ScanConstants.ACTION_START_SCAN -> {
+                    TransitionManager.beginDelayedTransition(binding.containerScan)
+                    binding.cropLayout.visibility = View.GONE
+                    imageSurfaceView?.setPreviewCallback()
+                }
+                ScanConstants.ACTION_START_PICK_IMAGE -> {
+                    finish()
+                }
+            }
         }
-        checkCameraPermissions()
-        if (intent.hasExtra(ScanConstants.IMAGE_PATH))
-            checkExternalStoragePermissions()
+
+        view.post {
+            when(intent.action){
+                ScanConstants.ACTION_START_SCAN -> {
+                    timeHoldStill = intent.getLongExtra(ScanConstants.TIME_HOLD_STILL, ScanSurfaceView.DEFAULT_TIME_POST_PICTURE)
+                    checkCameraPermissions()
+                }
+                ScanConstants.ACTION_START_PICK_IMAGE -> {
+                    try {
+                        var bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            ImageDecoder.decodeBitmap(ImageDecoder.createSource(contentResolver, intent.data!!))
+                        } else {
+                            MediaStore.Images.Media.getBitmap(contentResolver, intent.data)
+                        }
+
+//                        val realPath = FileUriUtils.getRealPath(applicationContext, intent.data!!)
+//
+//                        bitmap = determineImageRotation(File(realPath), bitmap)
+                        val matrix = Matrix()
+                        matrix.postRotate(90f)
+                        bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+
+//                        val height = window.findViewById<View>(Window.ID_ANDROID_CONTENT).height
+//                        val width = window.findViewById<View>(Window.ID_ANDROID_CONTENT).width
+//
+//                        bitmap = bitmap?.resizeToScreenContentSize(width, height)
+                        onPictureClicked(bitmap)
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
+
+    }
+
+    fun determineImageRotation(imageFile: File, bitmap: Bitmap): Bitmap {
+        val exif = ExifInterface(imageFile.absolutePath)
+        val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 0)
+        val matrix = Matrix()
+        when (orientation) {
+            6 -> matrix.postRotate(90f)
+            3 -> matrix.postRotate(180f)
+            8 -> matrix.postRotate(270f)
+        }
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
     private fun checkCameraPermissions() {
@@ -94,7 +150,7 @@ class ScanActivity : AppCompatActivity(), IScanner, View.OnClickListener {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 Toast.makeText(this, "Enable external storage permission", Toast.LENGTH_SHORT).show()
             } else {
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), PERMISSIONS_REQUEST_EXTERNAL_STORAGE)
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), PERMISSIONS_REQUEST_EXTERNAL_STORAGE)
             }
         } else {
             if (!isExternalStorageStatsPermissionGranted) {
@@ -164,6 +220,7 @@ class ScanActivity : AppCompatActivity(), IScanner, View.OnClickListener {
             screenSizeBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
             val height = window.findViewById<View>(Window.ID_ANDROID_CONTENT).height
             val width = window.findViewById<View>(Window.ID_ANDROID_CONTENT).width
+            Timber.d("-----$width ------- $height")
             screenSizeBitmap = screenSizeBitmap?.resizeToScreenContentSize(width, height)
             screenSizeBitmap?.let {
                 val originalMat = Mat(it.height, it.width, CvType.CV_8UC1)
@@ -198,7 +255,7 @@ class ScanActivity : AppCompatActivity(), IScanner, View.OnClickListener {
                 TransitionManager.beginDelayedTransition(binding.containerScan)
                 binding.cropLayout.visibility = View.VISIBLE
                 binding.cropImageView.setImageBitmap(it)
-                binding.cropImageView.scaleType = ImageView.ScaleType.FIT_XY
+//                binding.cropImageView.scaleType = ImageView.ScaleType.FIT_XY
             }
             fullSizeBitmap?.let {
                 val originalMat = Mat(it.height, it.width, CvType.CV_8UC1)
@@ -228,6 +285,7 @@ class ScanActivity : AppCompatActivity(), IScanner, View.OnClickListener {
                 fullSizePoints = pointFs
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             Timber.e(e)
         }
     }

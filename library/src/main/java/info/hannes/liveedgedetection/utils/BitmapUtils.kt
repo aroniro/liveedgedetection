@@ -27,6 +27,9 @@ fun Bitmap.enhanceReceipt(topLeft: Point, topRight: Point, bottomLeft: Point, bo
     if (bottomHeight > resultHeight)
         resultHeight = bottomHeight
     val inputMat = Mat(this.height, this.height, CvType.CV_8UC1)
+    Timber.d("enhanceReceipt - width : " + this.width + " - height : " + this.height )
+    Timber.d("enhanceReceipt - resultWidth : $resultWidth - bottomWidth : $bottomWidth")
+    Timber.d("enhanceReceipt - resultHeight : $resultHeight - bottomHeight : $bottomHeight")
     Utils.bitmapToMat(this, inputMat)
     val outputMat = Mat(resultWidth, resultHeight, CvType.CV_8UC1)
     val source: MutableList<Point> = ArrayList()
@@ -46,6 +49,8 @@ fun Bitmap.enhanceReceipt(topLeft: Point, topRight: Point, bottomLeft: Point, bo
     dest.add(ocvPOut4)
     val endM = Converters.vector_Point2f_to_Mat(dest)
     val perspectiveTransform = Imgproc.getPerspectiveTransform(startM, endM)
+//    Imgproc.warpPerspective(inputMat, outputMat, perspectiveTransform, Size(resultWidth.toDouble(), resultHeight.toDouble()))
+//    val output = Bitmap.createBitmap(resultWidth, resultHeight, Bitmap.Config.ARGB_8888)
     Imgproc.warpPerspective(inputMat, outputMat, perspectiveTransform, Size(resultWidth.toDouble(), resultHeight.toDouble()))
     val output = Bitmap.createBitmap(resultWidth, resultHeight, Bitmap.Config.ARGB_8888)
     Utils.matToBitmap(outputMat, output)

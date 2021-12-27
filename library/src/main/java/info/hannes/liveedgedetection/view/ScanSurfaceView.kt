@@ -205,7 +205,7 @@ class ScanSurfaceView(context: Context, iScanner: IScanner, val TIME_HOLD_STILL:
             } else {
                 ScanHint.MOVE_CLOSER
             }
-        } else if (imgDetectionPropsObj.isDetectedHeightAboveLimit) {
+        } else if (imgDetectionPropsObj.isDetectedHeightAboveNinetySeven) {
             cancelAutoCapture()
             scanHint = ScanHint.MOVE_AWAY
         } else if (imgDetectionPropsObj.isDetectedWidthAboveLimit || imgDetectionPropsObj.isDetectedAreaAboveLimit) {

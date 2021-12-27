@@ -116,6 +116,7 @@ dependencies {
 
     implementation "androidx.core:core-ktx:1.7.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation 'com.github.dhaval2404:imagepicker:2.1'
 }
 
 static def getGitOriginRemote() {

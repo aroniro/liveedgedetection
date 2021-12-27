@@ -18,12 +18,21 @@
         tools:ignore="HardcodedText" />
 
     <Button
+        android:id="@+id/buttonImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="image"
+        app:layout_constraintStart_toStartOf="@+id/buttonScan"
+        app:layout_constraintTop_toBottomOf="@+id/buttonScan"
+        tools:ignore="HardcodedText" />
+
+    <Button
         android:id="@+id/buttonLog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="logcat"
-        app:layout_constraintStart_toStartOf="@+id/buttonScan"
-        app:layout_constraintTop_toBottomOf="@+id/buttonScan"
+        app:layout_constraintStart_toStartOf="@+id/buttonImage"
+        app:layout_constraintTop_toBottomOf="@+id/buttonImage"
         tools:ignore="HardcodedText" />
 
     <Button

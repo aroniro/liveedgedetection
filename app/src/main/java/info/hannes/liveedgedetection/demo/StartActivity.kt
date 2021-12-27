@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import info.hannes.liveedgedetection.ScanConstants
 import info.hannes.liveedgedetection.demo.databinding.ActivityStartBinding
 import info.hannes.logcat.BothLogActivity
 
@@ -22,7 +23,8 @@ class StartActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        binding.buttonScan.setOnClickListener { startActivity(Intent(this, PreviewActivity::class.java)) }
+        binding.buttonScan.setOnClickListener { startActivity(Intent(ScanConstants.ACTION_START_SCAN, null, this, PreviewActivity::class.java)) }
+        binding.buttonImage.setOnClickListener { startActivity(Intent(ScanConstants.ACTION_START_PICK_IMAGE, null, this, PreviewActivity::class.java)) }
         binding.buttonLog.setOnClickListener { startActivity(Intent(this, BothLogActivity::class.java)) }
         binding.buttonCrash.setOnClickListener {
             Toast.makeText(this, "force crash ${info.hannes.logcat.BuildConfig.VERSIONNAME}", Toast.LENGTH_SHORT).show()

@@ -44,16 +44,16 @@ class ImageDetectionProperties(private val previewWidth: Double, private val pre
     }
 
     private val isRightEdgeDistorted: Boolean
-        get() = abs(topRightPoint.y - bottomRightPoint.y) > 100
+        get() = abs(topRightPoint.y - bottomRightPoint.y) > 150
 
     private val isLeftEdgeDistorted: Boolean
-        get() = Math.abs(topLeftPoint.y - bottomLeftPoint.y) > 100
+        get() = Math.abs(topLeftPoint.y - bottomLeftPoint.y) > 150
 
     private fun getMaxCosine(approx: MatOfPoint2f): Boolean {
         var maxCosine = 0.0
         val approxPoints = approx.toArray()
         maxCosine = ScanUtils.getMaxCosine(maxCosine, approxPoints)
-        return maxCosine >= 0.085 //(smallest angle is below 87 deg)
+        return maxCosine >= 0.153 //(smallest angle is below 87 deg)
     }
 
     val isEdgeTouching: Boolean
@@ -75,15 +75,15 @@ class ImageDetectionProperties(private val previewWidth: Double, private val pre
         get() = topLeftPoint.x <= 10 || topRightPoint.x <= 10
 
     private val isBottomEdgeTouching: Boolean
-        get() = bottomLeftPoint.x >= previewHeight - 50 || bottomRightPoint.x >= previewHeight - 50
+        get() = bottomLeftPoint.x >= previewHeight - 25 || bottomRightPoint.x >= previewHeight - 25
 
     private val isTopEdgeTouching: Boolean
-        get() = topLeftPoint.x <= 50 || topRightPoint.x <= 50
+        get() = topLeftPoint.x <= 25 || topRightPoint.x <= 25
 
     private val isRightEdgeTouching: Boolean
-        get() = topRightPoint.y >= previewWidth - 50 || bottomRightPoint.y >= previewWidth - 50
+        get() = topRightPoint.y >= previewWidth - 25 || bottomRightPoint.y >= previewWidth - 25
 
     private val isLeftEdgeTouching: Boolean
-        get() = topLeftPoint.y <= 50 || bottomLeftPoint.y <= 50
+        get() = topLeftPoint.y <= 25 || bottomLeftPoint.y <= 25
 
 }

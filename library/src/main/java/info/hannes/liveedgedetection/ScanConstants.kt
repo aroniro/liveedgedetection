@@ -18,4 +18,6 @@ object ScanConstants {
     const val CANNY_THRESH_U = 185
     const val TRUNC_THRESH = 150
     const val CUTOFF_THRESH = 155
+    const val ACTION_START_SCAN = "android.intent.action.START_SCAN"
+    const val ACTION_START_PICK_IMAGE = "android.intent.action.START_PICK_IMAGE"
 }
